@@ -1,0 +1,2638 @@
+1. Any shell scripting program
+* Sum of digits
+echo "Enter a number:"
+read number
+sum=0
+
+while [ $number -gt 0 ]; do
+  digit=$((number % 10))
+  sum=$((sum + digit))
+  number=$((number / 10))
+done
+
+echo "Sum of digits: $sum"
+
+*Average, Min, Max
+#!/bin/bash
+
+# Function to calculate average of given numbers
+average() {
+  sum=0
+  count=0
+  echo "Enter numbers for average calculation (enter 'done' to finish):"
+  while true; do
+    read num
+    if [ "$num" == "done" ]; then
+      break
+    fi
+    sum=$((sum + num))
+    count=$((count + 1))
+  done
+  if [ $count -gt 0 ]; then
+    echo "Average: $((sum / count))"
+  else
+    echo "No numbers entered."
+  fi
+}
+
+# Function to find the maximum digit from a given number
+max_digit() {
+  echo "Enter a number to find the max digit:"
+  read num
+  max=0
+  while [ $num -gt 0 ]; do
+    digit=$((num % 10))
+    if [ $digit -gt $max ]; then
+      max=$digit
+    fi
+    num=$((num / 10))
+  done
+  echo "Max digit: $max"
+}
+
+# Function to find the minimum digit from a given number
+min_digit() {
+  echo "Enter a number to find the min digit:"
+  read num
+  min=9
+  while [ $num -gt 0 ]; do
+    digit=$((num % 10))
+    if [ $digit -lt $min ]; then
+      min=$digit
+    fi
+    num=$((num / 10))
+  done
+  echo "Min digit: $min"
+}
+
+# Call functions
+average
+max_digit
+min_digit
+
+
+* Sorting array
+#!/bin/bash
+
+# Ask for array input from the user
+echo "Enter numbers to be sorted (separate with space):"
+read -a array
+
+# Sort the array
+sorted_array=($(for i in "${array[@]}"; do echo $i; done | sort -n))
+
+# Print the sorted array
+echo "Sorted array: ${sorted_array[@]}"
+
+
+*Factorial
+#!/bin/bash
+
+# Function to calculate factorial without recursion
+factorial_non_recursive() {
+  num=$1
+  result=1
+  for (( i=1; i<=num; i++ )); do
+    result=$((result * i))
+  done
+  echo "Factorial (non-recursive) of $num: $result"
+}
+
+# Function to calculate factorial with recursion
+factorial_recursive() {
+  num=$1
+  if [ $num -le 1 ]; then
+    echo 1
+  else
+    prev=$(factorial_recursive $((num - 1)))
+    echo $((num * prev))
+  fi
+}
+
+# Accept number as input
+echo "Enter a number to find its factorial:"
+read number
+factorial_non_recursive $number
+factorial_result=$(factorial_recursive $number)
+echo "Factorial (recursive) of $number: $factorial_result"
+
+*File type and permission checking
+#!/bin/bash
+
+# Accept filename as input
+echo "Enter the file name to check type and permissions:"
+read filename
+
+# Check if file exists
+if [ -e "$filename" ]; then
+  echo "File type: $(file $filename)"
+  echo "Permissions: $(ls -l $filename | awk '{print $1}')"
+else
+  echo "File does not exist."
+fi
+
+*String palindrome or not
+#!/bin/bash
+
+# Accept string input from the user
+echo "Enter a string:"
+read str
+
+# Reverse the string
+reversed_str=$(echo $str | rev)
+
+# Check if the string is palindrome
+if [ "$str" == "$reversed_str" ]; then
+  echo "The string is a palindrome."
+else
+  echo "The string is not a palindrome."
+fi
+
+
+2. Write a program demonstrating use of different system calls. 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
+#include <signal.h>
+#include <sys/utsname.h>
+
+// Function Declarations
+void process_system_calls();
+void file_system_calls();
+void communication_system_calls();
+void information_system_calls();
+
+int main() {
+    int choice;
+
+    printf("\n--- System Call Menu ---\n");
+    printf("1. Process Related\n");
+    printf("2. File Related\n");
+    printf("3. Communication Related\n");
+    printf("4. Information Related\n");
+    printf("5. Exit\n");
+    printf("Choose an option: ");
+    scanf("%d", &choice);
+
+    switch (choice) {
+        case 1: process_system_calls(); break;
+        case 2: file_system_calls(); break;
+        case 3: communication_system_calls(); break;
+        case 4: information_system_calls(); break;
+        case 5: exit(0);
+        default: 
+            printf("Invalid choice! Exiting program.\n");
+            exit(1);
+    }
+
+    return 0;  // The program will exit after one action.
+}
+
+// Process Related System Calls (fork, exit, wait, etc.)
+void process_system_calls() {
+    int choice;
+    pid_t pid;
+
+    printf("\n--- Process Related Calls ---\n");
+    printf("1. Fork\n2. Exit\n3. Wait\n4. Kill\n5. Exec\n");
+    printf("Choose an option: ");
+    scanf("%d", &choice);
+
+    switch (choice) {
+        case 1:
+            pid = fork();
+            if (pid == 0) {
+                printf("Child PID: %d\n", getpid());
+            } else {
+                printf("Parent PID: %d\n", getpid());
+                wait(NULL);  // Wait for the child process to finish
+            }
+            break;
+        case 2:
+            printf("Exiting process...\n");
+            exit(0);
+            break;
+        case 3:
+            pid = fork();
+            if (pid == 0) {
+                sleep(2);  // Simulate child work
+                exit(0);
+            } else {
+                printf("Waiting for child process to finish...\n");
+                wait(NULL);
+            }
+            break;
+        case 4:
+            pid = fork();
+            if (pid == 0) {
+                while (1);  // Infinite loop in child
+            } else {
+                sleep(1);
+                printf("Killing child process...\n");
+                kill(pid, SIGKILL);
+                wait(NULL);  // Ensure the child process is terminated
+            }
+            break;
+        case 5:
+            if (fork() == 0) {
+                execl("/bin/ls", "ls", "-l", NULL);  // Execute 'ls' command
+            } else {
+                wait(NULL);  // Wait for the 'ls' command to finish
+            }
+            break;
+        default:
+            printf("Invalid choice!\n");
+    }
+}
+
+// File Related System Calls (open, read, write, link, unlink, stat)
+void file_system_calls() {
+    int choice;
+    int fd;
+    char buffer[100];
+
+    printf("\n--- File Related Calls ---\n");
+    printf("1. Open/Read/Write/Close\n2. Link/Unlink\n3. Stat\n");
+    printf("Choose an option: ");
+    scanf("%d", &choice);
+
+    switch (choice) {
+        case 1:
+            fd = open("testfile.txt", O_CREAT | O_RDWR, 0644);
+            if (fd == -1) {
+                perror("Error opening file");
+                return;
+            }
+            write(fd, "Hello, World!\n", 14);
+            lseek(fd, 0, SEEK_SET);  // Move the file pointer to the beginning
+            read(fd, buffer, sizeof(buffer));
+            printf("File content: %s\n", buffer);
+            close(fd);
+            break;
+        case 2:
+            if (link("testfile.txt", "testfile_link.txt") == -1) {
+                perror("Link creation failed");
+            } else {
+                printf("Link created.\n");
+            }
+            if (unlink("testfile_link.txt") == -1) {
+                perror("Unlink failed");
+            } else {
+                printf("Link removed.\n");
+            }
+            break;
+        case 3: {
+            struct stat fileStat;
+            if (stat("testfile.txt", &fileStat) < 0) {
+                perror("Error getting stats");
+                return;
+            }
+            printf("File Size: %ld bytes\n", fileStat.st_size);
+            printf("File Permissions: %o\n", fileStat.st_mode & 0777);
+            break;
+        }
+        default:
+            printf("Invalid choice!\n");
+    }
+}
+
+// Communication Related System Calls (pipe, fifo)
+void communication_system_calls() {
+    int choice;
+    printf("1. Pipe\n2. FIFO\nChoose an option: ");
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        int fd[2];
+        pid_t pid;
+        char buffer[100];
+
+        if (pipe(fd) == -1) {
+            perror("Pipe failed");
+            return;
+        }
+
+        pid = fork();
+        if (pid == 0) {
+            close(fd[0]);  // Close the read end
+            write(fd[1], "Message via Pipe", 16);
+            close(fd[1]);  // Close the write end
+            exit(0);
+        } else {
+            close(fd[1]);  // Close the write end
+            int bytesRead = read(fd[0], buffer, sizeof(buffer));
+            buffer[bytesRead] = '\0';
+            printf("Received: %s\n", buffer);
+            close(fd[0]);
+            wait(NULL);  // Wait for the child to finish
+        }
+    } else if (choice == 2) {
+        char *fifo = "/tmp/myfifo";
+        mkfifo(fifo, 0666);
+
+        if (fork() == 0) {
+            int fd = open(fifo, O_WRONLY);
+            write(fd, "Message via FIFO", 16);
+            close(fd);
+            exit(0);
+        } else {
+            char buffer[100];
+            int fd = open(fifo, O_RDONLY);
+            int bytesRead = read(fd, buffer, sizeof(buffer));
+            buffer[bytesRead] = '\0';
+            printf("Received: %s\n", buffer);
+            close(fd);
+            wait(NULL);
+        }
+
+        unlink(fifo);
+    } else {
+        printf("Invalid option!\n");
+    }
+}
+
+// Information Related System Calls (pid, uname)
+void information_system_calls() {
+    int choice;
+    struct utsname buffer;
+
+    printf("\n--- Information Related Calls ---\n");
+    printf("1. Get PID\n2. Get PPID\n3. Uname\n");
+    printf("Choose an option: ");
+    scanf("%d", &choice);
+
+    switch (choice) {
+        case 1:
+            printf("PID: %d\n", getpid());
+            break;
+        case 2:
+            printf("PPID: %d\n", getppid());
+            break;
+        case 3:
+            if (uname(&buffer) < 0) {
+                perror("Uname failed");
+                return;
+            }
+            printf("System: %s\nNode: %s\nRelease: %s\nVersion: %s\nMachine: %s\n",
+                   buffer.sysname, buffer.nodename, buffer.release, buffer.version, buffer.machine);
+            break;
+        default:
+            printf("Invalid choice!\n");
+    }
+}
+
+
+3. Implement multi threading for Matrix Operations using Pthreads.
+// Input
+// 1 2 3
+// 4 5 6
+// 7 8 9
+// 9 8 7
+// 6 5 4
+// 3 2 1
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+#define MATRIX_SIZE 3
+
+int mat1[MATRIX_SIZE][MATRIX_SIZE], mat2[MATRIX_SIZE][MATRIX_SIZE], res[MATRIX_SIZE][MATRIX_SIZE];
+
+void *matrix_addition(void *arg);
+void *matrix_subtraction(void *arg);
+void *matrix_multiplication(void *arg);
+void populate_matrices();
+void print_matrix(const int matrix[MATRIX_SIZE][MATRIX_SIZE]);
+
+void populate_matrices() {
+    printf("Enter elements for Matrix 1:\n");
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            printf("mat1[%d][%d]: ", i, j);
+            scanf("%d", &mat1[i][j]);
+        }
+    }
+
+    printf("\nEnter elements for Matrix 2:\n");
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            printf("mat2[%d][%d]: ", i, j);
+            scanf("%d", &mat2[i][j]);
+        }
+    }
+
+    printf("\nMatrix 1:\n");
+    print_matrix(mat1);
+    printf("Matrix 2:\n");
+    print_matrix(mat2);
+}
+
+void print_matrix(const int matrix[MATRIX_SIZE][MATRIX_SIZE]) {
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+void *matrix_addition(void *arg) {
+    printf("Addition thread is running...\n");
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            res[i][j] = mat1[i][j] + mat2[i][j];
+        }
+    }
+    printf("Addition Result:\n");
+    print_matrix(res);
+    printf("Addition thread has finished.\n");
+
+    int *status = malloc(sizeof(int));
+    *status = 0;
+    pthread_exit(status);
+}
+
+void *matrix_subtraction(void *arg) {
+    printf("Subtraction thread is running...\n");
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            res[i][j] = mat1[i][j] - mat2[i][j];
+        }
+    }
+    printf("Subtraction Result:\n");
+    print_matrix(res);
+    printf("Subtraction thread has finished.\n");
+
+    int *status = malloc(sizeof(int));
+    *status = 1;
+    pthread_exit(status);
+}
+
+void *matrix_multiplication(void *arg) {
+    printf("Multiplication thread is running...\n");
+
+    for (int i = 0; i < MATRIX_SIZE; i++) {
+        for (int j = 0; j < MATRIX_SIZE; j++) {
+            res[i][j] = 0;
+            for (int k = 0; k < MATRIX_SIZE; k++) {
+                res[i][j] += mat1[i][k] * mat2[k][j];
+            }
+        }
+    }
+    printf("Multiplication Result:\n");
+    print_matrix(res);
+    printf("Multiplication thread has finished.\n");
+
+    int *status = malloc(sizeof(int));
+    *status = 2;
+    pthread_exit(status);
+}
+
+int main() {
+    pthread_t threads[3];
+    void *thread_status;
+
+    populate_matrices();
+
+    if (pthread_create(&threads[0], NULL, matrix_addition, NULL) != 0) {
+        perror("Error creating addition thread");
+        return EXIT_FAILURE;
+    }
+    if (pthread_create(&threads[1], NULL, matrix_subtraction, NULL) != 0) {
+        perror("Error creating subtraction thread");
+        return EXIT_FAILURE;
+    }
+    if (pthread_create(&threads[2], NULL, matrix_multiplication, NULL) != 0) {
+        perror("Error creating multiplication thread");
+        return EXIT_FAILURE;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        if (pthread_join(threads[i], &thread_status) != 0) {
+            perror("Error joining thread");
+            return EXIT_FAILURE;
+        }
+        printf("Thread %d exited with status: %d\n", i + 1, *((int *)thread_status));
+        free(thread_status);
+    }
+
+    return EXIT_SUCCESS;
+}
+
+4. Implementation of Classical problems (reader writer)  using Threads and Mutex
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+pthread_mutex_t mutex;  // Mutex for protecting read_count
+pthread_mutex_t wrt;    // Mutex for writer's mutual exclusion
+int read_count = 0;     // Number of readers
+
+// Reader function
+void *reader(void *arg) {
+    int reader_id = *((int *)arg);  // Reader ID
+    printf("Reader %d is trying to read\n", reader_id);
+
+    pthread_mutex_lock(&mutex);  // Protect read_count
+    read_count++;
+    if (read_count == 1) {
+        pthread_mutex_lock(&wrt);  // If first reader, lock writer mutex
+    }
+    pthread_mutex_unlock(&mutex);  // Release protection of read_count
+
+    // Reading section
+    printf("Reader %d is reading\n", reader_id);
+    sleep(1);  // Simulate reading
+    printf("Reader %d has finished reading\n", reader_id);
+
+    pthread_mutex_lock(&mutex);  // Protect read_count
+    read_count--;
+    if (read_count == 0) {
+        pthread_mutex_unlock(&wrt);  // If last reader, unlock writer mutex
+    }
+    pthread_mutex_unlock(&mutex);  // Release protection of read_count
+
+    return NULL;
+}
+
+// Writer function
+void *writer(void *arg) {
+    int writer_id = *((int *)arg);  // Writer ID
+    printf("Writer %d is trying to access the resource\n", writer_id);
+
+    pthread_mutex_lock(&wrt);  // Lock writer mutex (no readers or other writers)
+    printf("Writer %d is writing\n", writer_id);
+    sleep(1);  // Simulate writing
+    printf("Writer %d has finished writing\n", writer_id);
+
+    pthread_mutex_unlock(&wrt);  // Release writer mutex
+
+    return NULL;
+}
+
+int main() {
+    pthread_t read[5], write[3];  // 5 readers and 3 writers
+    int reader_ids[5], writer_ids[3];
+
+    // Initialize the mutexes
+    pthread_mutex_init(&mutex, NULL);  // Mutex for read_count protection
+    pthread_mutex_init(&wrt, NULL);    // Mutex for writer process
+
+    // Create reader and writer threads
+    for (int i = 0; i < 5; i++) {
+        reader_ids[i] = i + 1;
+        pthread_create(&read[i], NULL, reader, &reader_ids[i]);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        writer_ids[i] = i + 1;
+        pthread_create(&write[i], NULL, writer, &writer_ids[i]);
+    }
+
+    // Join reader and writer threads
+    for (int i = 0; i < 5; i++) {
+        pthread_join(read[i], NULL);
+    }
+    for (int i = 0; i < 3; i++) {
+        pthread_join(write[i], NULL);
+    }
+
+    // Destroy the mutexes
+    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&wrt);
+
+    return 0;
+}
+
+
+5. Implementation of Classical problems( producer consumer)  using Threads and Mutex
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 5
+
+int buffer[BUFFER_SIZE];
+int count = 0;  // Current count of items in the buffer
+
+pthread_mutex_t mutex;
+pthread_cond_t buffer_not_full, buffer_not_empty;
+
+// Producer function
+void *producer(void *arg) {
+    int id = *((int *)arg);
+    for (int i = 0; i < 5; i++) {
+        int item = rand() % 100;
+        printf("Producer %d is trying to produce\n", id);
+
+        pthread_mutex_lock(&mutex);
+
+        // Wait if buffer is full
+        while (count == BUFFER_SIZE) {
+            printf("Producer %d: Buffer is full, waiting...\n", id);
+            pthread_cond_wait(&buffer_not_full, &mutex);
+        }
+
+        // Produce an item
+        buffer[count++] = item;
+        printf("Producer %d: Produced %d. Buffer count: %d\n", id, item, count);
+
+        // Signal that buffer is not empty
+        pthread_cond_signal(&buffer_not_empty);
+        pthread_mutex_unlock(&mutex);
+
+        // Simulate production time
+    }
+    return NULL;
+}
+
+// Consumer function
+void *consumer(void *arg) {
+    int id = *((int *)arg);
+    for (int i = 0; i < 5; i++) {
+        pthread_mutex_lock(&mutex);
+
+        printf("Consumer %d is trying to consume\n", id);
+
+        // Wait if buffer is empty
+        while (count == 0) {
+            printf("Consumer %d: Buffer is empty, waiting...\n", id);
+            pthread_cond_wait(&buffer_not_empty, &mutex);
+        }
+
+        // Consume an item
+        int item = buffer[--count];
+        printf("Consumer %d: Consumed %d. Buffer count: %d\n", id, item, count);
+
+        // Signal that buffer is not full
+        pthread_cond_signal(&buffer_not_full);
+        pthread_mutex_unlock(&mutex);
+
+        // Simulate consumption time
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t prod[2], cons[2];
+    int ids[2] = {1, 2};
+
+    pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init(&buffer_not_full, NULL);
+    pthread_cond_init(&buffer_not_empty, NULL);
+
+    // Create producer and consumer threads
+    for (int i = 0; i < 2; i++) {
+        pthread_create(&prod[i], NULL, producer, &ids[i]);
+        pthread_create(&cons[i], NULL, consumer, &ids[i]);
+    }
+
+    // Join threads
+    for (int i = 0; i < 2; i++) {
+        pthread_join(prod[i], NULL);
+        pthread_join(cons[i], NULL);
+    }
+
+    // Destroy mutex and condition variables
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&buffer_not_full);
+    pthread_cond_destroy(&buffer_not_empty);
+
+    return 0;
+}
+
+6. Implementation of Classical problems (reader writer) using Threads and Semaphore. 
+import java.util.concurrent.Semaphore;
+
+public class ReaderWriter {
+    static Semaphore mutex = new Semaphore(1);   // Semaphore for protecting read_count
+    static Semaphore wrt = new Semaphore(1);     // Semaphore for writer's mutual exclusion
+    static int read_count = 0;                   // Number of readers
+
+    // Reader thread function
+    static class Reader extends Thread {
+        int readerId;
+
+        Reader(int id) {
+            this.readerId = id;
+        }
+
+        @Override
+        public void run() {
+            try {
+                System.out.println("Reader " + readerId + " is trying to read");
+
+                mutex.acquire(); // Protect read_count
+                read_count++;
+                if (read_count == 1) {
+                    wrt.acquire(); // If first reader, lock writer semaphore
+                }
+                mutex.release(); // Release protection of read_count
+
+                // Reading section
+                System.out.println("Reader " + readerId + " is reading");
+                Thread.sleep(1000); // Simulate reading
+                System.out.println("Reader " + readerId + " has finished reading");
+
+                mutex.acquire(); // Protect read_count
+                read_count--;
+                if (read_count == 0) {
+                    wrt.release(); // If last reader, unlock writer semaphore
+                }
+                mutex.release(); // Release protection of read_count
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Writer thread function
+    static class Writer extends Thread {
+        int writerId;
+
+        Writer(int id) {
+            this.writerId = id;
+        }
+
+        @Override
+        public void run() {
+            try {
+                System.out.println("Writer " + writerId + " is trying to access the resource");
+
+                wrt.acquire(); // Lock writer semaphore (no readers or other writers)
+                System.out.println("Writer " + writerId + " is writing");
+                Thread.sleep(1000); // Simulate writing
+                System.out.println("Writer " + writerId + " has finished writing");
+
+                wrt.release(); // Release writer semaphore
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        // Create reader and writer threads
+        Thread[] readers = new Thread[5]; // 5 readers
+        Thread[] writers = new Thread[3]; // 3 writers
+
+        // Create and start reader threads
+        for (int i = 0; i < 5; i++) {
+            readers[i] = new Reader(i + 1);
+            readers[i].start();
+        }
+
+        // Create and start writer threads
+        for (int i = 0; i < 3; i++) {
+            writers[i] = new Writer(i + 1);
+            writers[i].start();
+        }
+
+        // Wait for all threads to finish
+        try {
+            for (int i = 0; i < 5; i++) {
+                readers[i].join();
+            }
+            for (int i = 0; i < 3; i++) {
+                writers[i].join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+7. Implementation of Classical problems (producer consumer,) using Threads and Semaphore. 
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Random;
+import java.util.concurrent.Semaphore;
+
+public class ProducerConsumer {
+
+    private static final int BUFFER_SIZE = 5;
+    private final Queue<Integer> buffer = new LinkedList<>();
+    private final Semaphore empty = new Semaphore(BUFFER_SIZE); // Tracks empty slots in the buffer
+    private final Semaphore full = new Semaphore(0);            // Tracks filled slots in the buffer
+    private final Semaphore mutex = new Semaphore(1);           // Binary semaphore for mutual exclusion
+
+    public static void main(String[] args) {
+        ProducerConsumer pc = new ProducerConsumer();
+        
+        Thread producer1 = new Thread(new Producer(pc, 1));
+        Thread producer2 = new Thread(new Producer(pc, 2));
+        Thread consumer1 = new Thread(new Consumer(pc, 1));
+        Thread consumer2 = new Thread(new Consumer(pc, 2));
+        
+        producer1.start();
+        producer2.start();
+        consumer1.start();
+        consumer2.start();
+    }
+
+    // Producer class
+    static class Producer implements Runnable {
+        private final ProducerConsumer pc;
+        private final int id;
+
+        Producer(ProducerConsumer pc, int id) {
+            this.pc = pc;
+            this.id = id;
+        }
+
+        @Override
+        public void run() {
+            Random random = new Random();
+            for (int i = 0; i < 5; i++) {
+                int item = random.nextInt(100);
+                System.out.println("Producer " + id + " is trying to produce.");
+
+                try {
+                    pc.empty.acquire(); // Wait for an empty slot
+                    pc.mutex.acquire(); // Lock the critical section
+
+                    // Produce item
+                    pc.buffer.add(item);
+                    System.out.println("Producer " + id + " produced " + item + ". Buffer count: " + pc.buffer.size());
+
+                    pc.mutex.release(); // Release the lock
+                    pc.full.release();  // Signal that there’s a new item in the buffer
+
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    System.err.println(e.getMessage());
+                }
+            }
+        }
+    }
+
+    // Consumer class
+    static class Consumer implements Runnable {
+        private final ProducerConsumer pc;
+        private final int id;
+
+        Consumer(ProducerConsumer pc, int id) {
+            this.pc = pc;
+            this.id = id;
+        }
+
+        @Override
+        public void run() {
+            for (int i = 0; i < 5; i++) {
+                System.out.println("Consumer " + id + " is trying to consume.");
+
+                try {
+                    pc.full.acquire();  // Wait for a filled slot
+                    pc.mutex.acquire(); // Lock the critical section
+
+                    // Consume item
+                    int item = pc.buffer.poll();
+                    System.out.println("Consumer " + id + " consumed " + item + ". Buffer count: " + pc.buffer.size());
+
+                    pc.mutex.release(); // Release the lock
+                    pc.empty.release(); // Signal that there’s a new empty slot in the buffer
+
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    System.err.println(e.getMessage());
+                }
+            }
+        }
+    }
+}
+
+8. Implementation of Classical problems (dining philosopher) using Threads and Semaphore. 
+import java.util.concurrent.Semaphore;
+
+class DiningPhilosophers {
+
+    static final int NUM_PHILOSOPHERS = 5;
+    static Semaphore[] forks = new Semaphore[NUM_PHILOSOPHERS];
+    static Semaphore mutex = new Semaphore(1);  // To protect critical section for accessing shared resources
+    
+    static class Philosopher extends Thread {
+        int philosopherID;
+
+        Philosopher(int id) {
+            this.philosopherID = id;
+        }
+
+        public void run() {
+            try {
+                while (true) {
+                    think();
+                    pickUpForks();
+                    eat();
+                    putDownForks();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Philosopher is thinking
+        private void think() throws InterruptedException {
+            System.out.println("Philosopher " + philosopherID + " is thinking.");
+            Thread.sleep((long) (Math.random() * 1000)); // Simulate thinking
+        }
+
+        // Pick up both forks (left and right)
+        private void pickUpForks() throws InterruptedException {
+            mutex.acquire(); // Ensure only one philosopher can access critical section at a time
+            
+            // Acquire the left fork (fork[i])
+            forks[philosopherID].acquire();
+            System.out.println("Philosopher " + philosopherID + " picked up left fork.");
+
+            // Acquire the right fork (fork[(i+1)%5])
+            forks[(philosopherID + 1) % NUM_PHILOSOPHERS].acquire();
+            System.out.println("Philosopher " + philosopherID + " picked up right fork.");
+            
+            mutex.release(); // Release the mutex so others can access the critical section
+        }
+
+        // Philosopher is eating
+        private void eat() throws InterruptedException {
+            System.out.println("Philosopher " + philosopherID + " is eating.");
+            Thread.sleep((long) (Math.random() * 1000)); // Simulate eating
+        }
+
+        // Put down both forks after eating
+        private void putDownForks() {
+            forks[philosopherID].release();
+            System.out.println("Philosopher " + philosopherID + " put down left fork.");
+
+            forks[(philosopherID + 1) % NUM_PHILOSOPHERS].release();
+            System.out.println("Philosopher " + philosopherID + " put down right fork.");
+        }
+    }
+
+    public static void main(String[] args) {
+        // Initialize semaphores for each fork (each fork starts as available)
+        for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+            forks[i] = new Semaphore(1);
+        }
+
+        // Create philosopher threads
+        Philosopher[] philosophers = new Philosopher[NUM_PHILOSOPHERS];
+        for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+            philosophers[i] = new Philosopher(i);
+            philosophers[i].start();
+        }
+
+        // Wait for all philosophers to finish (in this case, they run indefinitely)
+        for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+            try {
+                philosophers[i].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+//Dining Philosophers Using Threads and Mutex
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+#define NUM_PHILOSOPHERS 5
+
+// Mutexes for each fork
+pthread_mutex_t forks[NUM_PHILOSOPHERS];
+
+// Philosopher function
+void* philosopher(void* arg) {
+    int philosopherID = *(int*)arg;  // Philosopher ID
+
+    while (1) {
+        // Thinking
+        printf("Philosopher %d is thinking\n", philosopherID);
+        sleep(0.3);  // Simulate thinking
+
+        // Pick up the left and right forks (mutexes)
+        pthread_mutex_lock(&forks[philosopherID]);  // Lock left fork
+        pthread_mutex_lock(&forks[(philosopherID + 1) % NUM_PHILOSOPHERS]);  // Lock right fork
+
+        // Eating
+        printf("Philosopher %d is eating\n", philosopherID);
+        sleep(0.3);  // Simulate eating
+
+        // Put down the forks
+        pthread_mutex_unlock(&forks[philosopherID]);  // Unlock left fork
+        pthread_mutex_unlock(&forks[(philosopherID + 1) % NUM_PHILOSOPHERS]);  // Unlock right fork
+
+        // Finished eating
+        printf("Philosopher %d has finished eating\n", philosopherID);
+    }
+    return NULL;
+}
+
+int main() {
+    pthread_t philosophers[NUM_PHILOSOPHERS];  // Philosopher threads
+    int philosopherIDs[NUM_PHILOSOPHERS];  // Philosopher IDs
+
+    // Initialize the mutexes for the forks
+    for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+        pthread_mutex_init(&forks[i], NULL);
+    }
+
+    // Create philosopher threads
+    for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+        philosopherIDs[i] = i;  // Assign philosopher ID
+        pthread_create(&philosophers[i], NULL, philosopher, &philosopherIDs[i]);
+    }
+
+    // Join philosopher threads
+    for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+        pthread_join(philosophers[i], NULL);
+    }
+
+    // Destroy mutexes
+    for (int i = 0; i < NUM_PHILOSOPHERS; i++) {
+        pthread_mutex_destroy(&forks[i]);
+    }
+
+    return 0;
+}
+
+9. Write a program to compute the finish time, turnaround time and waiting time for the First come First serve
+// Input: 
+// 4
+//0 2 
+//1 2 
+//5 3
+//6 4
+import java.util.Scanner;
+
+class Process {
+    int pid;
+    int burstTime;
+    int arrivalTime;
+    int waitingTime;
+    int turnaroundTime;
+    int finishTime;
+
+    public Process(int pid, int arrivalTime, int burstTime) {
+        this.pid = pid;
+        this.arrivalTime = arrivalTime;
+        this.burstTime = burstTime;
+    }
+}
+
+public class FCFS_Scheduling {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.print("Enter number of processes: ");
+        int n = scanner.nextInt();
+        
+        Process[] processes = new Process[n];
+        
+        // Input process details
+        for (int i = 0; i < n; i++) {
+            System.out.print("\nEnter arrival time, burst time " + (i + 1) + ": ");
+            int arrivalTime = scanner.nextInt();
+            int burstTime = scanner.nextInt();
+            processes[i] = new Process(i + 1, arrivalTime, burstTime);
+        }
+        
+        // FCFS Scheduling Calculation
+        FCFS(processes, n);
+        
+        // Print process table
+        printProcessTable(processes);
+        
+        scanner.close();
+    }
+
+    public static void FCFS(Process[] processes, int n) {
+        int time = 0;
+        
+        for (int i = 0; i < n; i++) {
+            if (time < processes[i].arrivalTime) {
+                time = processes[i].arrivalTime;
+            }
+
+            processes[i].finishTime = time + processes[i].burstTime;
+            processes[i].turnaroundTime = processes[i].finishTime - processes[i].arrivalTime;
+            processes[i].waitingTime = processes[i].turnaroundTime - processes[i].burstTime;
+            
+            time = processes[i].finishTime;
+        }
+    }
+
+    public static void printProcessTable(Process[] processes) {
+        System.out.println("\nPID\tAT\tBT\tFT\tTAT\tWT");
+        for (Process p : processes) {
+            System.out.printf("%d\t%d\t%d\t%d\t%d\t%d\n",
+                p.pid, p.arrivalTime, p.burstTime,
+                p.finishTime, p.turnaroundTime, p.waitingTime);
+        }
+    }
+}
+
+10. Write a program to compute the finish time, turnaround time and waiting time for the Shortest Job First (Preemptive and Non Preemptive) 
+// Input:
+// 4
+// 0 5
+// 1 3
+// 2 4
+// 4 1
+import java.util.Scanner;
+
+class Process {
+    int pid;
+    int burstTime;
+    int arrivalTime;
+    int waitingTime;
+    int turnaroundTime;
+    int finishTime;
+    int remainingTime;
+}
+
+public class SJF_Scheduling {
+    public static void printProcessTable(Process[] p, int n) {
+        System.out.println("\nPID\tAT\tBT\tFT\tTAT\tWT");
+        for (int i = 0; i < n; i++) {
+            System.out.printf("%d\t%d\t%d\t%d\t%d\t%d\n", p[i].pid, p[i].arrivalTime, p[i].burstTime,
+                    p[i].finishTime, p[i].turnaroundTime, p[i].waitingTime);
+        }
+    }
+
+    // SJF Non-Preemptive
+    public static void sjfNonPreemptive(Process[] p, int n) {
+        int time = 0;
+        int completed = 0;
+        boolean[] isCompleted = new boolean[n];
+
+        System.out.println("\n--- SJF Non-Preemptive Scheduling ---");
+
+        while (completed != n) {
+            int idx = -1;
+            int minBurst = Integer.MAX_VALUE;
+
+            for (int i = 0; i < n; i++) {
+                if (p[i].arrivalTime <= time && !isCompleted[i]) {
+                    if (p[i].burstTime < minBurst) {
+                        minBurst = p[i].burstTime;
+                        idx = i;
+                    }
+                }
+            }
+
+            if (idx != -1) {
+                time += p[idx].burstTime;
+                p[idx].finishTime = time;
+                p[idx].turnaroundTime = p[idx].finishTime - p[idx].arrivalTime;
+                p[idx].waitingTime = p[idx].turnaroundTime - p[idx].burstTime;
+                isCompleted[idx] = true;
+                completed++;
+            } else {
+                time++;
+            }
+        }
+        printProcessTable(p, n);
+    }
+
+    // SJF Preemptive (SRTF)
+    public static void sjfPreemptive(Process[] p, int n) {
+        int time = 0;
+        int completed = 0;
+        int minBurst = Integer.MAX_VALUE;
+        int idx = -1;
+        boolean[] isCompleted = new boolean[n];
+
+        System.out.println("\n--- SJF Preemptive (SRTF) Scheduling ---");
+
+        while (completed != n) {
+            for (int i = 0; i < n; i++) {
+                if (p[i].arrivalTime <= time && !isCompleted[i]) {
+                    if (p[i].remainingTime < minBurst) {
+                        minBurst = p[i].remainingTime;
+                        idx = i;
+                    }
+                }
+            }
+
+            if (idx != -1) {
+                p[idx].remainingTime--;
+                time++;
+                minBurst = p[idx].remainingTime;
+
+                if (p[idx].remainingTime == 0) {
+                    p[idx].finishTime = time;
+                    p[idx].turnaroundTime = p[idx].finishTime - p[idx].arrivalTime;
+                    p[idx].waitingTime = p[idx].turnaroundTime - p[idx].burstTime;
+                    isCompleted[idx] = true;
+                    completed++;
+                    minBurst = Integer.MAX_VALUE;
+                }
+            } else {
+                time++;
+            }
+        }
+        printProcessTable(p, n);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter number of processes: ");
+        int n = sc.nextInt();
+
+        Process[] p = new Process[n];
+
+        for (int i = 0; i < n; i++) {
+            p[i] = new Process();
+            p[i].pid = i + 1;
+            System.out.print("Enter arrival time and burst time for process " + (i + 1) + ": ");
+            p[i].arrivalTime = sc.nextInt();
+            p[i].burstTime = sc.nextInt();
+            p[i].remainingTime = p[i].burstTime;
+        }
+
+        sjfNonPreemptive(p, n);
+        sjfPreemptive(p, n);
+    }
+}
+
+11. Write a program to compute the finish time, turnaround time and waiting time for the Priority (Preemptive and Non Preemptive)
+// Input
+// 4
+// 0 5 4
+// 1 4 3
+// 2 2 2
+// 4 1 1
+import java.util.Scanner;
+
+class Process {
+    int pid, arrivalTime, burstTime, remainingTime, priority, finishTime, turnaroundTime, waitingTime;
+
+    public Process(int pid, int arrivalTime, int burstTime, int priority) {
+        this.pid = pid;
+        this.arrivalTime = arrivalTime;
+        this.burstTime = burstTime;
+        this.remainingTime = burstTime;
+        this.priority = priority;
+    }
+}
+
+public class PriorityScheduling {
+    public static void printProcessTable(Process[] processes, int n) {
+        System.out.println("\nPID\tAT\tBT\tPRI\tFT\tTAT\tWT");
+        for (int i = 0; i < n; i++) {
+            System.out.printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", processes[i].pid, processes[i].arrivalTime,
+                    processes[i].burstTime, processes[i].priority, processes[i].finishTime, processes[i].turnaroundTime,
+                    processes[i].waitingTime);
+        }
+    }
+
+    // Priority Scheduling Non-Preemptive
+    public static void prioritySchedulingNonPreemptive(Process[] processes, int n) {
+        int time = 0, completed = 0;
+        boolean[] isCompleted = new boolean[n];
+
+        System.out.println("\n--- Priority Scheduling Non-Preemptive ---");
+
+        while (completed < n) {
+            int idx = -1;
+            int highestPriority = Integer.MAX_VALUE;
+
+            // Check for process with the highest priority (lowest priority value)
+            for (int i = 0; i < n; i++) {
+                if (processes[i].arrivalTime <= time && !isCompleted[i] && processes[i].priority < highestPriority) {
+                    highestPriority = processes[i].priority;
+                    idx = i;
+                }
+            }
+
+            if (idx != -1) {
+                // Execute the process
+                time += processes[idx].burstTime;
+                processes[idx].finishTime = time;
+                processes[idx].turnaroundTime = processes[idx].finishTime - processes[idx].arrivalTime;
+                processes[idx].waitingTime = processes[idx].turnaroundTime - processes[idx].burstTime;
+                isCompleted[idx] = true;
+                completed++;
+            } else {
+                time++;
+            }
+        }
+        printProcessTable(processes, n);
+    }
+
+    // Priority Scheduling Preemptive
+    public static void prioritySchedulingPreemptive(Process[] processes, int n) {
+        int time = 0, completed = 0;
+        boolean[] isCompleted = new boolean[n];
+
+        System.out.println("\n--- Priority Scheduling Preemptive ---");
+
+        while (completed < n) {
+            int idx = -1;
+            int highestPriority = Integer.MAX_VALUE;
+
+            // Check for process with the highest priority (lowest priority value)
+            for (int i = 0; i < n; i++) {
+                if (processes[i].arrivalTime <= time && !isCompleted[i] && processes[i].priority < highestPriority) {
+                    highestPriority = processes[i].priority;
+                    idx = i;
+                }
+            }
+
+            if (idx != -1) {
+                // Execute the process
+                processes[idx].remainingTime--;
+                time++;
+
+                // Check if the process has finished
+                if (processes[idx].remainingTime == 0) {
+                    processes[idx].finishTime = time;
+                    processes[idx].turnaroundTime = processes[idx].finishTime - processes[idx].arrivalTime;
+                    processes[idx].waitingTime = processes[idx].turnaroundTime - processes[idx].burstTime;
+                    isCompleted[idx] = true;
+                    completed++;
+                }
+            } else {
+                time++;
+            }
+        }
+        printProcessTable(processes, n);
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter the number of processes: ");
+        int n = sc.nextInt();
+        Process[] processes = new Process[n];
+
+        for (int i = 0; i < n; i++) {
+            System.out.printf("Enter Arrival Time, Burst Time and Priority for process %d: ", i + 1);
+            int arrivalTime = sc.nextInt();
+            int burstTime = sc.nextInt();
+            int priority = sc.nextInt();
+            processes[i] = new Process(i + 1, arrivalTime, burstTime, priority);
+        }
+
+        prioritySchedulingNonPreemptive(processes, n);
+        prioritySchedulingPreemptive(processes, n);
+    }
+}
+
+12. Write a program to compute the finish time, turnaround time and waiting time for the Round robin 
+// Input:
+// 4
+// 0 5 
+// 1 4 
+// 2 2 
+// 4 1 
+// 2
+import java.util.Scanner;
+
+class Process {
+    int pid; // Process ID
+    int arrivalTime; // Arrival time
+    int burstTime; // Burst time
+    int remainingBurstTime; // Remaining burst time
+    int finishTime; // Finish time
+    int turnaroundTime; // Turnaround time
+    int waitingTime; // Waiting time
+}
+
+public class RoundRobinScheduling {
+
+    // Function to display the results
+    public static void displayResults(Process[] processes, int n) {
+        System.out.println("\n--- Round Robin Scheduling Results ---");
+        System.out.println("PID\tAT\tBT\tFT\tTAT\tWT");
+        for (int i = 0; i < n; i++) {
+            System.out.println(processes[i].pid + "\t" + processes[i].arrivalTime + "\t" + processes[i].burstTime + "\t" 
+                                + processes[i].finishTime + "\t" + processes[i].turnaroundTime + "\t" + processes[i].waitingTime);
+        }
+    }
+
+    // Round Robin scheduling function
+    public static void roundRobin(Process[] processes, int n, int quantum) {
+        int currentTime = 0; // Current time
+        boolean isCompleted = false;
+
+        while (!isCompleted) {
+            isCompleted = true; // Assume all processes are completed
+
+            for (int i = 0; i < n; i++) {
+                if (processes[i].remainingBurstTime > 0 && processes[i].arrivalTime <= currentTime) {
+                    isCompleted = false; // Found a process that is not completed
+
+                    // Execute for quantum time or remaining time
+                    int execTime = Math.min(processes[i].remainingBurstTime, quantum);
+                    processes[i].remainingBurstTime -= execTime;
+                    currentTime += execTime;
+
+                    // If process is completed
+                    if (processes[i].remainingBurstTime == 0) {
+                        processes[i].finishTime = currentTime;
+                        processes[i].turnaroundTime = currentTime - processes[i].arrivalTime;
+                        processes[i].waitingTime = processes[i].turnaroundTime - processes[i].burstTime;
+                    }
+                }
+            }
+        }
+
+        // Display the results
+        System.out.println("\nRound Robin (Quantum = " + quantum + "):");
+        displayResults(processes, n);
+    }
+
+    // Main function
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        // Get the number of processes
+        System.out.print("Enter the number of processes: ");
+        int n = sc.nextInt();
+
+        // Declare process array
+        Process[] processes = new Process[n];
+
+        // Input processes' arrival time and burst time
+        for (int i = 0; i < n; i++) {
+            processes[i] = new Process();
+            processes[i].pid = i + 1;
+            System.out.print("Enter Arrival Time and Burst Time for process " + (i + 1) + ": ");
+            processes[i].arrivalTime = sc.nextInt();
+            processes[i].burstTime = sc.nextInt();
+            processes[i].remainingBurstTime = processes[i].burstTime; // Initialize remaining burst time
+        }
+
+        // Get the time quantum
+        System.out.print("Enter the Time Quantum: ");
+        int quantum = sc.nextInt();
+
+        // Call the roundRobin function
+        roundRobin(processes, n, quantum);
+
+        sc.close();
+    }
+}
+
+13. Write a program to check whether given system is in safe state or not using Banker’s Deadlock Avoidance algorithm.
+// Input:
+// 5
+// 3
+// 0 1 0
+// 2 0 0
+// 3 0 2
+// 2 1 1
+// 0 0 2
+// 7 5 3
+// 3 2 2
+// 9 0 2
+// 4 2 2
+// 5 3 3
+// 10 5 7
+import java.util.Scanner;
+
+public class BankersAlgorithm {
+
+    // Function to print a matrix
+    public static void printMatrix(int[][] matrix, int rows, int cols) {
+        for (int i = 0; i < rows; i++) {
+            System.out.print("[ ");
+            for (int j = 0; j < cols; j++) {
+                System.out.print(matrix[i][j] + " ");
+            }
+            System.out.println("]");
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter total Number of processes: ");
+        int processes = sc.nextInt();
+
+        System.out.print("Enter total Number of resources: ");
+        int numberOfResources = sc.nextInt();
+
+        // Matrices for allocated, max, and need
+        int[][] allocated = new int[processes][numberOfResources];
+        int[][] max = new int[processes][numberOfResources];
+        int[][] need = new int[processes][numberOfResources];
+
+        // Input for allocated resources
+        for (int i = 0; i < processes; i++) {
+            System.out.print("\nEnter allocated resources for process " + i + " (space-separated): ");
+            for (int j = 0; j < numberOfResources; j++) {
+                allocated[i][j] = sc.nextInt();
+            }
+        }
+
+        // Input for maximum resources
+        for (int i = 0; i < processes; i++) {
+            System.out.print("Enter maximum resources for process " + i + " (space-separated): ");
+            for (int j = 0; j < numberOfResources; j++) {
+                max[i][j] = sc.nextInt();
+            }
+        }
+
+        // Input for total resources
+        int[] totalResources = new int[numberOfResources];
+        System.out.print("Enter total instances of all resources (space-separated): ");
+        for (int i = 0; i < numberOfResources; i++) {
+            totalResources[i] = sc.nextInt();
+        }
+
+        // Calculate the need matrix
+        for (int i = 0; i < processes; i++) {
+            for (int j = 0; j < numberOfResources; j++) {
+                need[i][j] = max[i][j] - allocated[i][j];
+            }
+        }
+
+        // Print matrices
+        System.out.println("\nAllocated Matrix:");
+        printMatrix(allocated, processes, numberOfResources);
+
+        System.out.println("\nMax Matrix:");
+        printMatrix(max, processes, numberOfResources);
+
+        System.out.println("\nNeed Matrix:");
+        printMatrix(need, processes, numberOfResources);
+
+        // Calculate allocated resources sum per resource type
+        int[] allocatedResources = new int[numberOfResources];
+        for (int i = 0; i < processes; i++) {
+            for (int j = 0; j < numberOfResources; j++) {
+                allocatedResources[j] += allocated[i][j];
+            }
+        }
+
+        // Calculate available resources
+        int[] available = new int[numberOfResources];
+        for (int i = 0; i < numberOfResources; i++) {
+            available[i] = totalResources[i] - allocatedResources[i];
+        }
+
+        boolean[] statusOfProcess = new boolean[processes];
+
+        System.out.print("\nAllocated: ");
+        for (int i = 0; i < numberOfResources; i++) {
+            System.out.print(allocatedResources[i] + " ");
+        }
+        System.out.println();
+        
+        System.out.print("Available: ");
+        for (int i = 0; i < numberOfResources; i++) {
+            System.out.print(available[i] + " ");
+        }
+        System.out.println();
+
+        // Banker's algorithm for finding the safe sequence
+        int[] safeSequence = new int[processes];
+        int seqIndex = 0;
+        boolean flag1 = true;
+
+        while (flag1) {
+            flag1 = false;
+            boolean flag2 = false;
+
+            for (int i = 0; i < processes; i++) {
+                if (!statusOfProcess[i]) {
+                    flag2 = false;
+                    for (int j = 0; j < numberOfResources; j++) {
+                        if (need[i][j] > available[j]) {
+                            flag2 = true;
+                            break;
+                        }
+                    }
+
+                    if (!flag2) {
+                        flag1 = true;
+                        statusOfProcess[i] = true;
+                        safeSequence[seqIndex++] = i;
+
+                        for (int j = 0; j < numberOfResources; j++) {
+                            available[j] += allocated[i][j];
+                        }
+
+                        System.out.print("Available resource after execution of process Id " + i + ": ");
+                        for (int j = 0; j < numberOfResources; j++) {
+                            System.out.print(available[j] + " ");
+                        }
+                        System.out.println();
+                    }
+                }
+            }
+        }
+
+        // Check for unsafe state
+        for (int i = 0; i < processes; i++) {
+            if (!statusOfProcess[i]) {
+                System.out.println("The system is in unsafe state");
+                return;
+            }
+        }
+
+        System.out.print("Safe sequence: ");
+        for (int i = 0; i < seqIndex; i++) {
+            System.out.print(safeSequence[i] + " ");
+        }
+        System.out.println();
+    }
+}
+
+14. Write a program for Deadlock detection algorithm
+// Input
+// 3
+// 3
+// 3 3 3
+// 2 0 3
+// 1 2 4
+// 3 6 8
+// 4 3 3
+// 3 4 4
+// 1 2 0
+import java.util.Scanner;
+
+public class DeadlockDetection {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.print("Enter number of processes: ");
+        int numProcesses = sc.nextInt();
+
+        System.out.print("Enter number of resources: ");
+        int numResources = sc.nextInt();
+
+        int[][] allocation = new int[numProcesses][numResources];
+        int[][] request = new int[numProcesses][numResources];
+        int[] available = new int[numResources];
+
+        // Input the Allocation Matrix
+        System.out.println("\nEnter the Allocation Matrix:");
+        for (int i = 0; i < numProcesses; i++) {
+            System.out.print("Process " + i + ": ");
+            for (int j = 0; j < numResources; j++) {
+                allocation[i][j] = sc.nextInt();
+            }
+        }
+
+        // Input the Request Matrix
+        System.out.println("\nEnter the Request Matrix:");
+        for (int i = 0; i < numProcesses; i++) {
+            System.out.print("Process " + i + ": ");
+            for (int j = 0; j < numResources; j++) {
+                request[i][j] = sc.nextInt();
+            }
+        }
+
+        // Input the Available Resources
+        System.out.print("\nEnter Available Resources: ");
+        for (int i = 0; i < numResources; i++) {
+            available[i] = sc.nextInt();
+        }
+
+        // Initialize Finish array to false for all processes
+        boolean[] finish = new boolean[numProcesses];
+        for (int i = 0; i < numProcesses; i++) {
+            finish[i] = false; // Initially, no process is finished
+        }
+
+        // Work array to track the available resources as the algorithm proceeds
+        int[] work = available.clone();
+
+        // Perform deadlock detection
+        boolean deadlockExists = false;
+        while (true) {
+            boolean progress = false;
+
+            for (int i = 0; i < numProcesses; i++) {
+                if (!finish[i]) {
+                    boolean canProceed = true;
+
+                    // Check if resources requested by process i can be satisfied
+                    for (int j = 0; j < numResources; j++) {
+                        if (request[i][j] > work[j]) {
+                            canProceed = false;
+                            break;
+                        }
+                    }
+
+                    // If resources are sufficient for process i
+                    if (canProceed) {
+                        // Simulate process completion
+                        for (int j = 0; j < numResources; j++) {
+                            work[j] += allocation[i][j];
+                        }
+                        finish[i] = true; // Mark process as finished
+                        progress = true;
+                    }
+                }
+            }
+
+            // If no progress was made in this cycle, break the loop
+            if (!progress) {
+                break;
+            }
+        }
+
+        // Check for deadlock
+        for (int i = 0; i < numProcesses; i++) {
+            if (!finish[i]) {
+                deadlockExists = true;
+                System.out.println("\nDeadlock detected! Process " + i + " is involved.");
+            }
+        }
+
+        if (!deadlockExists) {
+            System.out.println("No deadlock detected. The system is in a safe state.");
+        }
+    }
+}
+
+15. Write a program to calculate the number of page faults for a reference string for the FIFO page replacement algorithms:
+16. Write a program to calculate the number of page faults for a reference string for the LRU page replacement algorithms: 
+17. Write a program to calculate the number of page faults for a reference string for the Optimal page replacement algorithms: 
+//Input: A B C E A B D -1
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class PageReplacementAlgorithms {
+
+    static final int MAX_PAGES = 100;
+    static final int MAX_FRAMES = 10;
+
+    // FIFO Page Replacement
+    public static int FIFO(int[] pages, int n, int frames) {
+        int pageFaults = 0;
+        int[] frame = new int[frames];
+        int index = 0;
+        Arrays.fill(frame, -1);
+
+        for (int i = 0; i < n; i++) {
+            boolean found = false;
+            for (int j = 0; j < frames; j++) {
+                if (frame[j] == pages[i]) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                frame[index] = pages[i];
+                index = (index + 1) % frames; // Circular increment
+                pageFaults++;
+            }
+        }
+        return pageFaults;
+    }
+
+    // LRU Page Replacement
+    public static int LRU(int[] pages, int n, int frames) {
+        int pageFaults = 0;
+        int[] frame = new int[frames];
+        int[] lastUsed = new int[frames];
+        Arrays.fill(frame, -1);
+        Arrays.fill(lastUsed, -1);
+
+        for (int i = 0; i < n; i++) {
+            boolean found = false;
+            for (int j = 0; j < frames; j++) {
+                if (frame[j] == pages[i]) {
+                    found = true;
+                    lastUsed[j] = i; // Update last used time
+                    break;
+                }
+            }
+
+            if (!found) {
+                int lruIndex = 0;
+                for (int j = 1; j < frames; j++) {
+                    if (lastUsed[j] < lastUsed[lruIndex]) {
+                        lruIndex = j; // Find the least recently used
+                    }
+                }
+                frame[lruIndex] = pages[i];
+                lastUsed[lruIndex] = i; // Update last used time
+                pageFaults++;
+            }
+        }
+        return pageFaults;
+    }
+
+    // Optimal Page Replacement
+    public static int Optimal(int[] pages, int n, int frames) {
+        int pageFaults = 0;
+        int[] frame = new int[frames];
+        Arrays.fill(frame, -1);
+
+        for (int i = 0; i < n; i++) {
+            boolean found = false;
+            for (int j = 0; j < frames; j++) {
+                if (frame[j] == pages[i]) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                int optimalIndex = -1;
+                int farthest = -1;
+
+                for (int j = 0; j < frames; j++) {
+                    int k;
+                    for (k = i + 1; k < n; k++) {
+                        if (frame[j] == pages[k]) {
+                            if (k > farthest) {
+                                farthest = k;
+                                optimalIndex = j; // Replace this page
+                            }
+                            break;
+                        }
+                    }
+                    if (k == n) {
+                        optimalIndex = j; // If page is not found in future
+                        break;
+                    }
+                }
+                if (optimalIndex == -1) {
+                    optimalIndex = 0; // Replace the first frame if none are found
+                }
+                frame[optimalIndex] = pages[i];
+                pageFaults++;
+            }
+        }
+        return pageFaults;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int frames = 3; // Default number of frames
+
+        System.out.print("Enter the page reference string (space-separated, end with -1): ");
+        int[] pages = new int[MAX_PAGES];
+        int n = 0;
+
+        // Read pages from input
+        while (true) {
+            String temp = sc.next();
+            if (temp.equals("-1")) {
+                break;
+            }
+            pages[n++] = temp.charAt(0) - 'A'; // Convert character to integer (A=0, B=1, ...)
+        }
+
+        // Calculate page faults for each algorithm
+        int fifoPageFaults = FIFO(pages, n, frames);
+        int lruPageFaults = LRU(pages, n, frames);
+        int optimalPageFaults = Optimal(pages, n, frames);
+
+        System.out.println("\nPage faults for FIFO: " + fifoPageFaults);
+        System.out.println("Page faults for LRU: " + lruPageFaults);
+        System.out.println("Page faults for Optimal: " + optimalPageFaults);
+
+        sc.close();
+    }
+}
+
+18. Write a program to simulate FCFS disk scheduling. Calculate total seek time.Print accepted input and output in tabular format
+// Input: 
+// 7
+// 82 170 43 140 24 16 190
+import java.util.Scanner;
+
+public class FCFS_DiskScheduling {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        int startTrack = 50;
+        System.out.print("Enter the number of track requests: ");
+        int numRequests = scanner.nextInt();
+
+        int[] requests = new int[numRequests];
+        System.out.print("Enter the track requests: ");
+        for (int i = 0; i < numRequests; i++) {
+            requests[i] = scanner.nextInt();
+        }
+
+        int totalSeekTime = 0;
+        int currentTrack = startTrack;
+
+        System.out.printf("%-15s %-20s%n", "\nNext Track Accessed", "Tracks Traversed");
+
+        for (int i = 0; i < numRequests; i++) {
+            int nextTrack = requests[i];
+            int tracksTraversed = Math.abs(nextTrack - currentTrack);
+            totalSeekTime += tracksTraversed;
+
+            System.out.printf("%-15d %-20d%n", nextTrack, tracksTraversed);
+            currentTrack = nextTrack;
+        }
+        
+        System.out.println("\nTotal Seek Time: " + totalSeekTime);
+
+        scanner.close();
+    }
+}
+
+19. Write a program to simulate SSTF disk scheduling. Calculate total seek time.Print accepted input and output in tabular format
+// Input: 
+// 7
+// 82 170 43 140 24 16 190
+import java.util.Scanner;
+import java.util.ArrayList;
+
+public class SSTF_DiskScheduling {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        int startTrack = 50;
+        System.out.print("Enter the number of track requests: ");
+        int numRequests = scanner.nextInt();
+
+        ArrayList<Integer> requests = new ArrayList<>();
+        System.out.print("Enter the track requests: ");
+        for (int i = 0; i < numRequests; i++) {
+            requests.add(scanner.nextInt());
+        }
+
+        int totalSeekTime = 0;
+        int currentTrack = startTrack;
+
+        System.out.printf("%-15s %-20s%n", "\nNext Track Accessed", "Tracks Traversed");
+
+        while (!requests.isEmpty()) {
+            int closestTrack = findClosestTrack(currentTrack, requests);
+            int tracksTraversed = Math.abs(closestTrack - currentTrack);
+            totalSeekTime += tracksTraversed;
+
+            System.out.printf("%-15d %-20d%n", closestTrack, tracksTraversed);
+
+            currentTrack = closestTrack;
+            requests.remove(Integer.valueOf(closestTrack));
+        }
+
+        System.out.println("\nTotal Seek Time: " + totalSeekTime);
+
+        scanner.close();
+    }
+
+    private static int findClosestTrack(int currentTrack, ArrayList<Integer> requests) {
+        int minDistance = Integer.MAX_VALUE;
+        int closestTrack = -1;
+
+        for (int track : requests) {
+            int distance = Math.abs(track - currentTrack);
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestTrack = track;
+            }
+        }
+        return closestTrack;
+    }
+}
+
+20. Write a program to simulate SCAN disk scheduling. Calculate total seek time.Print accepted input and output in tabular format
+// Input: 
+// 7
+// 82 170 43 140 24 16 190
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Scanner;
+
+public class SCAN_DiskScheduling {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int startTrack = 50;
+        int lastTrack = 199;
+        System.out.print("Enter the number of track requests: ");
+        int numRequests = scanner.nextInt();
+        
+        ArrayList<Integer> requests = new ArrayList<>();
+        System.out.print("Enter the track requests: ");
+        for (int i = 0; i < numRequests; i++) {
+            requests.add(scanner.nextInt());
+        }
+
+        requests.add(startTrack);
+        requests.add(lastTrack);
+        Collections.sort(requests);  
+
+        int startIndex = requests.indexOf(startTrack);
+
+        int totalSeekTime = 0;
+        int currentTrack = startTrack;
+
+        System.out.printf("%-15s %-20s%n", "\nNext Track Accessed", "Tracks Traversed");
+
+        for (int i = startIndex + 1; i < requests.size(); i++) {
+            int nextTrack = requests.get(i);
+            int tracksTraversed = Math.abs(nextTrack - currentTrack);
+            totalSeekTime += tracksTraversed;
+
+            System.out.printf("%-15d %-20d%n", nextTrack, tracksTraversed);
+            currentTrack = nextTrack;
+        }
+
+        for (int i = startIndex - 1; i >= 0; i--) {
+            int nextTrack = requests.get(i);
+            int tracksTraversed = Math.abs(nextTrack - currentTrack);
+            totalSeekTime += tracksTraversed;
+
+            System.out.printf("%-15d %-20d%n", nextTrack, tracksTraversed);
+
+            currentTrack = nextTrack;
+        }
+        
+        System.out.println("\nTotal Seek Time: " + totalSeekTime);
+
+        scanner.close();
+    }
+}
+
+21. Write a program to simulate C-SCAN disk scheduling. Calculate total seek time.Print accepted input and output in tabular format
+// Input: 
+// 7
+// 82 170 43 140 24 16 190
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Scanner;
+
+public class CSCAN_DiskScheduling {
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        int startTrack = 50;
+        int lastTrack = 199;  
+        int firstTrack = 0;   
+        System.out.print("Enter the number of track requests: ");
+        int numRequests = scanner.nextInt();
+
+        ArrayList<Integer> requests = new ArrayList<>();
+        System.out.print("Enter the track requests: ");
+        for (int i = 0; i < numRequests; i++) {
+            requests.add(scanner.nextInt());
+        }
+
+        requests.add(startTrack);
+        requests.add(firstTrack); 
+        requests.add(lastTrack); 
+        Collections.sort(requests); 
+
+        int startIndex = requests.indexOf(startTrack);
+
+        int totalSeekTime = 0;
+        int currentTrack = startTrack;
+
+        System.out.printf("%-20s %-20s%n", "Next Track Accessed", "Tracks Traversed");
+
+        for (int i = startIndex + 1; i < requests.size(); i++) {
+            int nextTrack = requests.get(i);
+            int tracksTraversed = Math.abs(nextTrack - currentTrack);
+            totalSeekTime += tracksTraversed;
+            System.out.printf("%-20d %-20d%n", nextTrack, tracksTraversed);
+
+            currentTrack = nextTrack;
+        }
+
+        // After reaching the last track, jump back to the first track
+        if (currentTrack != firstTrack) {
+            int tracksTraversed = Math.abs(lastTrack - firstTrack);
+            totalSeekTime += tracksTraversed;
+            System.out.printf("%-20d %-20d%n", firstTrack, tracksTraversed);
+            currentTrack = firstTrack;
+        }
+
+        // Continue servicing the remaining requests from the beginning
+        for (int i = 0; i < startIndex; i++) {
+            int nextTrack = requests.get(i);
+            int tracksTraversed = Math.abs(nextTrack - currentTrack);
+            totalSeekTime += tracksTraversed;
+
+            System.out.printf("%-20d %-20d%n", nextTrack, tracksTraversed);
+            currentTrack = nextTrack;
+        }
+
+        System.out.println("\nTotal Seek Time: " + totalSeekTime);
+
+        scanner.close();
+    }
+}
+
+22. Write a program  for following 1)  zombie process 2)orphan processes 3)sum of even numbers of an array in parent and odd numbers of an array in child process
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+int main() {
+    int numbers[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int size = sizeof(numbers) / sizeof(numbers[0]);
+    pid_t pid = fork();
+
+    if (pid < 0) {
+        perror("Fork failed");
+        exit(1);
+    }
+    else if (pid == 0) {
+        // Child process (calculates sum of odd numbers)
+        int oddSum = 0;
+        for (int i = 0; i < size; i++) {
+            if (numbers[i] % 2 != 0) {
+                oddSum += numbers[i];
+            }
+        }
+        printf("Child process: Sum of odd numbers = %d\n", oddSum);
+
+        // Simulate a zombie state by exiting without being reaped immediately
+        printf("Child process: Finishing (will become a zombie if parent does not reap me)\n");
+        exit(0);  // Child exits here, potentially becoming a zombie
+    } 
+    else {
+        // Parent process
+        int evenSum = 0;
+        for (int i = 0; i < size; i++) {
+            if (numbers[i] % 2 == 0) {
+                evenSum += numbers[i];
+            }
+        }
+        printf("Parent process: Sum of even numbers = %d\n", evenSum);
+
+        // Simulate orphan process by terminating before the child completes
+        printf("Parent process: Sleeping for 5 seconds to allow child to become a zombie\n");
+        sleep(4);
+
+        // Reap the zombie child process
+        int status;
+        waitpid(pid, &status, 0);  // Reap the child to clean up the zombie process
+        printf("Parent process: Reaped child, zombie state cleaned up.\n");
+        printf("Parent process: Exiting, making the child an orphan if it’s still running\n");
+        exit(0);
+    }
+    return 0;
+}
+
+23. Write a shell script to perform following operations on   student database.
+a) Insert b) Delete c)Update d)Search
+
+#!/bin/bash
+
+# Declare an associative array to hold student data
+declare -A student_db
+
+# Function to insert student data
+insert_student() {
+    echo "Enter student ID:"
+    read id
+    echo "Enter student name:"
+    read name
+    echo "Enter student age:"
+    read age
+    echo "Enter student grade:"
+    read grade
+
+    # Insert data into associative array
+    student_db["$id"]="$name,$age,$grade"
+    echo "Student with ID $id inserted successfully."
+}
+
+# Function to delete student data
+delete_student() {
+    echo "Enter student ID to delete:"
+    read id
+
+    if [[ -v student_db["$id"] ]]; then
+        unset student_db["$id"]
+        echo "Student with ID $id deleted successfully."
+    else
+        echo "Student with ID $id not found."
+    fi
+}
+
+# Function to update student data
+update_student() {
+    echo "Enter student ID to update:"
+    read id
+
+    if [[ -v student_db["$id"] ]]; then
+        echo "Enter new name:"
+        read name
+        echo "Enter new age:"
+        read age
+        echo "Enter new grade:"
+        read grade
+
+        # Update data in associative array
+        student_db["$id"]="$name,$age,$grade"
+        echo "Student with ID $id updated successfully."
+    else
+        echo "Student with ID $id not found."
+    fi
+}
+
+# Function to search for student data
+search_student() {
+    echo "Enter student ID to search:"
+    read id
+
+    if [[ -v student_db["$id"] ]]; then
+        # Extract student data
+        IFS=',' read -r name age grade <<< "${student_db[$id]}"
+        echo "Student ID: $id"
+        echo "Name: $name"
+        echo "Age: $age"
+        echo "Grade: $grade"
+    else
+        echo "Student with ID $id not found."
+    fi
+}
+
+# Menu for selecting operations
+while true; do
+    echo -e "\n--- Student Database Menu ---"
+    echo "1. Insert Student"
+    echo "2. Delete Student"
+    echo "3. Update Student"
+    echo "4. Search Student"
+    echo "5. Exit"
+    echo -n "Choose an option: "
+    read option
+
+    case $option in
+        1) insert_student ;;
+        2) delete_student ;;
+        3) update_student ;;
+        4) search_student ;;
+        5) echo "Exiting..."; exit 0 ;;
+        *) echo "Invalid option. Try again." ;;
+    esac
+done
+
+
+24. Write a program to read and copy the contents of file character by character, line by line.
+input.txt:
+Hello
+Isha
+Here
+
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+// Function to read and display file character by character
+void readFileCharacterByCharacter(const string &fileName) {
+    ifstream file(fileName);
+    
+    if (!file.is_open()) {
+        cerr << "Error opening file." << endl;
+        return;
+    }
+
+    char ch;
+    while (file.get(ch)) {
+        cout << ch; // Print each character as it's read
+    }
+
+    file.close();
+}
+
+// Function to read and display file line by line
+void readFileLineByLine(const string &fileName) {
+    ifstream file(fileName);
+    
+    if (!file.is_open()) {
+        cerr << "Error opening file." << endl;
+        return;
+    }
+
+    string line;
+    while (getline(file, line)) {
+        cout << line << endl; // Print each line as it's read
+    }
+
+    file.close();
+}
+
+int main() {
+    string fileName = "input.txt"; // Replace with your actual file path
+    cout << "Reading file character by character:" << endl;
+    readFileCharacterByCharacter(fileName);
+    cout << "\nReading file line by line:" << endl;
+    readFileLineByLine(fileName);
+
+    return 0;
+}
+
+
+25. Write a program to load ALP program from input file to main memory.
+source.txt:
+MOV A, 5
+ADD A, B
+SUB A, C
+JMP 10
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MEMORY_SIZE 100
+
+// Simulated memory
+char* memory[MEMORY_SIZE];
+
+// Function to load ALP program from a file to memory
+void loadALPProgram(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf("Error opening file: %s\n", filename);
+        return;
+    }
+
+    char line[256];
+    int i = 0;
+
+    // Read the file line by line
+    while (fgets(line, sizeof(line), file) != NULL) {
+        if (i < MEMORY_SIZE) {
+            memory[i] = malloc(strlen(line) + 1);  // Allocate memory for each line
+            if (memory[i] != NULL) {
+                strcpy(memory[i], line);  // Copy the line to memory
+            }
+            i++;
+        } else {
+            printf("Memory overflow: Too many lines in the ALP program\n");
+            break;
+        }
+    }
+
+    fclose(file);
+}
+
+// Function to print the contents of memory
+void printMemory() {
+    printf("\nMemory Contents:\n");
+    for (int i = 0; i < MEMORY_SIZE; i++) {
+        if (memory[i] != NULL) {
+            printf("Memory[%d]: %s", i, memory[i]);
+        }
+    }
+}
+
+int main() {
+    const char *filename = "source.txt";  // ALP program file name
+
+    // Load the ALP program from file into memory
+    loadALPProgram(filename);
+
+    // Print the memory contents
+    printMemory();
+
+    // Free allocated memory
+    for (int i = 0; i < MEMORY_SIZE; i++) {
+        if (memory[i] != NULL) {
+            free(memory[i]);  // Free the allocated memory
+        }
+    }
+
+    return 0;
+}
+
+26. Write a program to check Opcode error in a given job and raise an interrupt.
+Input:
+$AMJ140300050008
+GD30LR33SR37GD40LR40SU30LR41SR39PD30
+H
+$DTA
+SHE SELLS   SEA SHELLS ON
+SHORE
+$END
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <unordered_set>
+#include <cctype>
+
+using namespace std;
+
+// Define valid opcodes
+const unordered_set<string> validOpcodes = {
+    "GD", "PD", "LR", "SR", "CR", "BT", "H"
+};
+
+// Function to check if an opcode is valid
+bool isValidOpcode(const string &opcode) {
+    return validOpcodes.find(opcode) != validOpcodes.end();
+}
+
+// Function to check for opcode errors and time limit exceeded
+void checkOpcodeErrors(const string &job, int jobId, int timeLimit) {
+    int instructionCounter = 0;
+    bool errorFound = false;
+
+    for (size_t i = 0; i < job.length(); i += 4) {
+        instructionCounter++;
+
+        // Check if the instruction counter exceeds the time limit
+        if (instructionCounter > timeLimit) {
+            cout << "Job ID: " << jobId << " - Error: Time Limit Exceeded" << endl;
+            cout << "IC: " << instructionCounter << endl;
+            cout << "TTC: " << instructionCounter - 1 << endl;
+            errorFound = true; // Flag that error occurred, continue checking opcodes
+        }
+
+        string instruction = job.substr(i, 4);
+
+        // Check if the instruction is "H" (which doesn't have an operand)
+        if (instruction == "H") {
+            continue; // Skip the opcode check for "H"
+        }
+
+        // Ensure that the instruction has enough characters to extract the opcode
+        if (instruction.length() < 4) {
+            cout << "Job ID: " << jobId << " - Error: Incomplete Instruction" << endl;
+            cout << "IC: " << instructionCounter << endl;
+            cout << "IR: " << instruction << endl;
+            cout << "TTC: " << instructionCounter - 1 << endl;
+            errorFound = true;
+            break; // Raise interrupt and stop further checks
+        }
+
+        // Extract the opcode (first two characters)
+        string opcode = instruction.substr(0, 2);
+
+        // Check for opcode error
+        if (!isValidOpcode(opcode)) {
+            cout << "Job ID: " << jobId << " - Error: Operation Code Error" << endl;
+            cout << "IC: " << instructionCounter << endl;
+            cout << "IR: " << instruction << endl;
+            cout << "TTC: " << instructionCounter - 1 << endl;
+            errorFound = true;
+            break; // Raise interrupt and stop further checks
+        }
+    }
+
+    if (!errorFound) {
+        cout << "Job ID: " << jobId << " - No Opcode Error" << endl;
+    }
+}
+
+int main() {
+    string line, jobInstructions;
+    int jobId = 0, timeLimit = 0;
+    bool inInstructions = false;
+
+    cout << "Enter job details (end with $END):" << endl;
+
+    while (getline(cin, line)) {
+        if (line.rfind("$AMJ", 0) == 0) { // Line starts with $AMJ
+            jobId = stoi(line.substr(4, 4)); // Extract Job ID from $AMJ line
+            timeLimit = stoi(line.substr(8, 4)); // Extract time limit from $AMJ line
+            inInstructions = true;
+            jobInstructions.clear(); // Clear previous job instructions if any
+        }
+        else if (line == "$DTA") {
+            inInstructions = false; // Ignore instructions between $DTA and $END
+        }
+        else if (line.rfind("$END", 0) == 0) {
+            checkOpcodeErrors(jobInstructions, jobId, timeLimit); // Check errors in the collected job instructions
+            cout << "------------------------------------" << endl;
+            break; // End of input
+        }
+        else if (inInstructions) {
+            jobInstructions += line; // Accumulate job instructions without spaces
+        }
+    }
+
+    return 0;
+}
+
+
+27. Write a program to check Operand error in a given job and raise an interrupt.
+Input:
+$AMJ140300050008
+GD30LR33SR37GD40LR40SR3KLR41SR39PD3O
+H
+$DTA
+SHE SELLS   SEA SHELLS ON
+SHORE
+$END
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <unordered_set>
+#include <cctype>
+
+using namespace std;
+
+// Function to check if operand is valid (should be numeric only)
+bool isValidOperand(const string &operand) {
+    for (char c : operand) {
+        if (!isdigit(c)) {
+            return false; // If any character is not a digit, return false
+        }
+    }
+    return true; // All characters are digits
+}
+
+// Function to check for operand errors and raise an interrupt if found
+void checkOperandErrors(const string &job, int jobId, int timeLimit) {
+    int instructionCounter = 0;
+    bool errorFound = false;
+
+    for (size_t i = 0; i < job.length(); i += 4) {
+        instructionCounter++;
+
+        // Check if the instruction counter exceeds the time limit
+        if (instructionCounter > timeLimit) {
+            cout << "Job ID: " << jobId << " - Error: Time Limit Exceeded" << endl;
+            cout << "IC: " << instructionCounter << endl;
+            cout << "TTC: " << instructionCounter - 1 << endl;
+            errorFound = true; // This will flag that an error occurred, but we continue to check operands
+        }
+
+        string instruction = job.substr(i, 4);
+
+        // Check if the instruction is "H" (which doesn't have an operand)
+        if (instruction == "H") {
+            continue; // Skip the operand check for "H"
+        }
+
+        // Ensure that the instruction has enough characters to extract the operand
+        if (instruction.length() < 4) {
+            cout << "Job ID: " << jobId << " - Error: Incomplete Instruction" << endl;
+            cout << "IC: " << instructionCounter << endl;
+            cout << "IR: " << instruction << endl;
+            cout << "TTC: " << instructionCounter - 1 << endl;
+            errorFound = true;
+            break; // Raise interrupt and stop further checks
+        }
+
+        // Extract the operand (last two characters)
+        string operand = instruction.substr(2, 2);
+
+        // Check for operand error
+        if (!isValidOperand(operand)) {
+            cout << "Job ID: " << jobId << " - Error: Operand Error" << endl;
+            cout << "IC: " << instructionCounter << endl;
+            cout << "IR: " << instruction << endl;
+            cout << "TTC: " << instructionCounter - 1 << endl;
+            errorFound = true;
+            break; // Raise interrupt and stop further checks
+        }
+    }
+
+    if (!errorFound) {
+        cout << "Job ID: " << jobId << " - No Operand Error" << endl;
+    }
+}
+
+int main() {
+    string line, jobInstructions;
+    int jobId = 0, timeLimit = 0;
+    bool inInstructions = false;
+
+    cout << "Enter job details (end with $END):" << endl;
+
+    while (getline(cin, line)) {
+        if (line.rfind("$AMJ", 0) == 0) { // Line starts with $AMJ
+            jobId = stoi(line.substr(4, 4)); // Extract Job ID from $AMJ line
+            timeLimit = stoi(line.substr(8, 4)); // Extract time limit from $AMJ line
+            inInstructions = true;
+            jobInstructions.clear(); // Clear previous job instructions if any
+        }
+        else if (line == "$DTA") {
+            inInstructions = false; // Ignore instructions between $DTA and $END
+        }
+        else if (line.rfind("$END", 0) == 0) {
+            checkOperandErrors(jobInstructions, jobId, timeLimit); // Check errors in the collected job instructions
+            cout << "------------------------------------" << endl;
+            break; // End of input
+        }
+        else if (inInstructions) {
+            jobInstructions += line; // Accumulate job instructions without spaces
+        }
+    }
+
+    return 0;
+}
+
